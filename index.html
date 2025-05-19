@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vritti - Smart Study Companion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom styles */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Subject color coding */
+        .subject-math { background-color: #3b82f6; }
+        .subject-science { background-color: #10b981; }
+        .subject-english { background-color: #f59e0b; }
+        .subject-history { background-color: #8b5cf6; }
+        .subject-computer { background-color: #ec4899; }
+        .subject-other { background-color: #64748b; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Floating animation */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <!-- Navigation Bar -->
+    <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <i class="fas fa-brain text-3xl mr-3 text-yellow-300"></i>
+                    <h1 class="text-2xl font-bold">Vritti</h1>
+                    <span class="ml-2 text-xs bg-yellow-500 text-gray-900 px-2 py-1 rounded-full">Beta</span>
+                </div>
+                <div class="flex space-x-1 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+                    <a href="index.html" class="nav-item px-4 py-2 rounded-lg bg-white bg-opacity-20 font-medium">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </a>
+                    <a href="schedule.html" class="nav-item px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium">
+                        <i class="fas fa-calendar-alt mr-2"></i>Schedule
+                    </a>
+                    <a href="tasks.html" class="nav-item px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium">
+                        <i class="fas fa-tasks mr-2"></i>Tasks
+                    </a>
+                    <a href="progress.html" class="nav-item px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium">
+                        <i class="fas fa-chart-line mr-2"></i>Progress
+                    </a>
+                    <a href="resources.html" class="nav-item px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium">
+                        <i class="fas fa-book mr-2"></i>Resources
+                    </a>
+                    <a href="profile.html" class="nav-item px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium">
+                        <i class="fas fa-user mr-2"></i>Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Hero Section -->
+        <section class="gradient-bg rounded-2xl shadow-xl text-white p-8 mb-8 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
+            <div class="relative z-10 flex flex-col md:flex-row items-center">
+                <div class="md:w-2/3 mb-8 md:mb-0">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Elevate Your Study Game with Vritti</h2>
+                    <p class="text-lg mb-6 opacity-90">Your intelligent companion for academic success. Organize, track, and optimize your study routine with powerful analytics and personalized recommendations.</p>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="schedule.html" class="px-6 py-3 bg-white text-indigo-800 rounded-lg hover:bg-gray-100 transition-colors font-medium">
+                            <i class="fas fa-plus mr-2"></i>Create Schedule
+                        </a>
+                        <a href="#features" class="px-6 py-3 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-colors font-medium">
+                            <i class="fas fa-info-circle mr-2"></i>Learn More
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/3 flex justify-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3976/3976626.png" alt="Study Illustration" class="w-64 h-64 object-contain floating">
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats Section -->
+        <section class="bg-white rounded-2xl shadow-md p-6 mb-8 fade-in">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                <span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3">
+                    <i class="fas fa-chart-pie"></i>
+                </span>
+                Your Study Dashboard
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-500 card-hover">
+                    <p class="text-sm text-blue-800 font-medium">Today's Study</p>
+                    <p id="today-hours" class="text-2xl font-bold text-blue-600">0h 0m</p>
+                    <p class="text-xs text-blue-600 mt-1">Last session: <span id="last-session">None</span></p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-xl border-l-4 border-green-500 card-hover">
+                    <p class="text-sm text-green-800 font-medium">Upcoming Tasks</p>
+                    <p id="upcoming-tasks" class="text-2xl font-bold text-green-600">0</p>
+                    <p class="text-xs text-green-600 mt-1"><span id="urgent-tasks">0</span> urgent</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-xl border-l-4 border-purple-500 card-hover">
+                    <p class="text-sm text-purple-800 font-medium">Weekly Goal</p>
+                    <p id="weekly-goal" class="text-2xl font-bold text-purple-600">0%</p>
+                    <p class="text-xs text-purple-600 mt-1"><span id="weekly-hours">0</span> of <span id="goal-hours">20</span> hours</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-500 card-hover">
+                    <p class="text-sm text-yellow-800 font-medium">Current Streak</p>
+                    <p id="study-streak" class="text-2xl font-bold text-yellow-600">0 days</p>
+                    <p class="text-xs text-yellow-600 mt-1">Best: <span id="best-streak">0</span> days</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Activity Section -->
+        <section class="bg-white rounded-2xl shadow-md p-6 mb-8 fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                    <span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3">
+                        <i class="fas fa-clock"></i>
+                    </span>
+                    Recent Activity
+                </h2>
+                <div class="flex space-x-2">
+                    <a href="progress.html" class="text-sm text-indigo-600 hover:underline flex items-center">
+                        View All <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Recent Study Sessions -->
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h3 class="font-medium text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-book-open mr-2 text-indigo-500"></i> Study Sessions
+                    </h3>
+                    <div id="recent-sessions" class="space-y-3 max-h-64 overflow-y-auto pr-2">
+                        <div class="text-center py-8">
+                            <i class="fas fa-book text-3xl text-gray-300 mb-2"></i>
+                            <p class="text-gray-500">No recent study sessions</p>
+                            <a href="schedule.html" class="text-indigo-600 text-sm hover:underline mt-2 inline-block">Start a session</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Tasks -->
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h3 class="font-medium text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-tasks mr-2 text-green-500"></i> Recent Tasks
+                    </h3>
+                    <div id="recent-tasks" class="space-y-3 max-h-64 overflow-y-auto pr-2">
+                        <div class="text-center py-8">
+                            <i class="fas fa-clipboard-list text-3xl text-gray-300 mb-2"></i>
+                            <p class="text-gray-500">No recent tasks</p>
+                            <a href="tasks.html" class="text-indigo-600 text-sm hover:underline mt-2 inline-block">Add a task</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="bg-white rounded-2xl shadow-md p-6 mb-8 fade-in">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">
+                <span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3 inline-block">
+                    <i class="fas fa-star"></i>
+                </span>
+                Why Choose Vritti?
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-50 p-5 rounded-xl card-hover">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
+                        <i class="fas fa-calendar-check text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Smart Scheduling</h3>
+                    <p class="text-gray-600">Automatically plan your study sessions based on your goals, deadlines, and energy levels throughout the day.</p>
+                </div>
+                
+                <div class="bg-gray-50 p-5 rounded-xl card-hover">
+                    <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-network text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Progress Analytics</h3>
+                    <p class="text-gray-600">Visualize your study patterns with detailed charts and receive personalized recommendations for improvement.</p>
+                </div>
+                
+                <div class="bg-gray-50 p-5 rounded-xl card-hover">
+                    <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-4">
+                        <i class="fas fa-brain text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Cognitive Techniques</h3>
+                    <p class="text-gray-600">Built-in study methods like Pomodoro, Spaced Repetition, and Active Recall to maximize learning efficiency.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Study Tip & Motivation -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Study Tip -->
+            <div class="bg-indigo-50 rounded-2xl shadow-md p-6 fade-in">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3">
+                        <i class="fas fa-lightbulb"></i>
+                    </span>
+                    Study Tip of the Day
+                </h2>
+                <div id="study-tip" class="bg-white rounded-lg p-4 border-l-4 border-indigo-600">
+                    <p class="text-gray-800">"The Pomodoro Technique (25 minutes of focused study followed by a 5-minute break) can significantly improve your concentration and retention."</p>
+                </div>
+                <button onclick="displayStudyTip()" class="mt-3 text-indigo-600 text-sm hover:underline flex items-center">
+                    <i class="fas fa-sync-alt mr-1"></i> Get Another Tip
+                </button>
+            </div>
+            
+            <!-- Motivation -->
+            <div class="bg-yellow-50 rounded-2xl shadow-md p-6 fade-in">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <span class="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center mr-3">
+                        <i class="fas fa-fire"></i>
+                    </span>
+                    Daily Motivation
+                </h2>
+                <div id="motivation-quote" class="bg-white rounded-lg p-4 border-l-4 border-yellow-600">
+                    <p class="text-gray-800">"Success is the sum of small efforts, repeated day in and day out."</p>
+                    <p class="text-gray-600 text-sm mt-2">— Robert Collier</p>
+                </div>
+                <button onclick="displayMotivation()" class="mt-3 text-yellow-600 text-sm hover:underline flex items-center">
+                    <i class="fas fa-sync-alt mr-1"></i> New Motivation
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fas fa-brain mr-2 text-yellow-300"></i> Vritti
+                    </h3>
+                    <p class="text-gray-400">Your intelligent study companion designed to help you achieve academic excellence through better organization and smarter study techniques.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+                        <li><a href="schedule.html" class="text-gray-400 hover:text-white transition-colors">Schedule</a></li>
+                        <li><a href="tasks.html" class="text-gray-400 hover:text-white transition-colors">Tasks</a></li>
+                        <li><a href="progress.html" class="text-gray-400 hover:text-white transition-colors">Progress</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Resources</h3>
+                    <ul class="space-y-2">
+                        <li><a href="resources.html" class="text-gray-400 hover:text-white transition-colors">Study Materials</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Study Techniques</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Connect</h3>
+                    <div class="flex space-x-4 mb-4">
+                        <a href="#" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-indigo-600 flex items-center justify-center transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-pink-600 flex items-center justify-center transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-blue-600 flex items-center justify-center transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center transition-colors">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <p class="text-gray-400">Subscribe to our newsletter</p>
+                    <div class="mt-2 flex">
+                        <input type="email" placeholder="Your email" class="px-3 py-2 bg-gray-700 text-white rounded-l focus:outline-none w-full">
+                        <button class="bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded-r">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 pt-6 text-center text-gray-400">
+                <p>&copy; 2023 Vritti. All rights reserved. | <a href="#" class="hover:text-white transition-colors">Privacy Policy</a> | <a href="#" class="hover:text-white transition-colors">Terms of Service</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load data from localStorage
+            loadData();
+            
+            // Display random study tip
+            displayStudyTip();
+            
+            // Display motivation quote
+            displayMotivation();
+        });
+        
+        // Load data from localStorage
+        function loadData() {
+            // Load study sessions
+            const sessions = JSON.parse(localStorage.getItem('studySessions')) || [];
+            displayRecentSessions(sessions);
+            
+            // Load tasks
+            const tasks = JSON.parse(localStorage.getItem('studyTasks')) || [];
+            updateUpcomingTasks(tasks);
+            displayRecentTasks(tasks);
+            
+            // Calculate today's study hours
+            calculateTodayStudyHours(sessions);
+            
+            // Calculate weekly goal progress
+            calculateWeeklyGoal(sessions);
+            
+            // Calculate study streak
+            calculateStudyStreak(sessions);
+        }
+        
+        // Display recent study sessions
+        function displayRecentSessions(sessions) {
+            const recentSessionsContainer = document.getElementById('recent-sessions');
+            
+            if (sessions.length === 0) return;
+            
+            // Sort by most recent
+            sessions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Get last 3 sessions
+            const recentSessions = sessions.slice(0, 3);
+            
+            recentSessionsContainer.innerHTML = '';
+            
+            recentSessions.forEach(session => {
+                const sessionElement = document.createElement('div');
+                sessionElement.className = 'flex items-center justify-between p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors shadow-xs';
+                
+                // Determine subject color
+                const subjectClass = `subject-${session.subject.toLowerCase()}`;
+                
+                sessionElement.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="w-10 h-10 rounded-full ${subjectClass} flex items-center justify-center text-white font-bold mr-3">
+                            ${session.subject.charAt(0)}
+                        </span>
+                        <div>
+                            <p class="font-medium">${session.subject}</p>
+                            <p class="text-sm text-gray-600">${formatDate(session.date)}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-medium">${session.duration} hours</p>
+                        <p class="text-sm text-gray-600">${session.topic || 'General Study'}</p>
+                    </div>
+                `;
+                
+                recentSessionsContainer.appendChild(sessionElement);
+            });
+        }
+        
+        // Display recent tasks
+        function displayRecentTasks(tasks) {
+            const recentTasksContainer = document.getElementById('recent-tasks');
+            
+            if (tasks.length === 0) return;
+            
+            // Sort by most recent
+            tasks.sort((a, b) => new Date(b.createdAt || new Date()) - new Date(a.createdAt || new Date()));
+            
+            // Get last 3 tasks
+            const recentTasks = tasks.slice(0, 3);
+            
+            recentTasksContainer.innerHTML = '';
+            
+            recentTasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = `flex items-center justify-between p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors shadow-xs ${task.completed ? 'opacity-75' : ''}`;
+                
+                taskElement.innerHTML = `
+                    <div class="flex items-center">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                            class="mr-3 h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" 
+                            onclick="toggleTaskCompletion('${task.id}')">
+                        <div>
+                            <p class="font-medium ${task.completed ? 'line-through' : ''}">${task.title}</p>
+                            <p class="text-sm text-gray-600">${task.subject || 'No subject'}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs ${getPriorityColor(task.priority)}">${task.priority || 'Medium'}</p>
+                        <p class="text-xs text-gray-600">${task.dueDate ? formatDate(task.dueDate) : 'No deadline'}</p>
+                    </div>
+                `;
+                
+                recentTasksContainer.appendChild(taskElement);
+            });
+        }
+        
+        // Toggle task completion
+        function toggleTaskCompletion(taskId) {
+            let tasks = JSON.parse(localStorage.getItem('studyTasks')) || [];
+            tasks = tasks.map(task => {
+                if (task.id === taskId) {
+                    task.completed = !task.completed;
+                    task.completedAt = task.completed ? new Date().toISOString() : null;
+                }
+                return task;
+            });
+            localStorage.setItem('studyTasks', JSON.stringify(tasks));
+            loadData(); // Refresh the data
+        }
+        
+        // Get priority color
+        function getPriorityColor(priority) {
+            switch (priority?.toLowerCase()) {
+                case 'high': return 'text-red-600';
+                case 'medium': return 'text-yellow-600';
+                case 'low': return 'text-green-600';
+                default: return 'text-gray-600';
+            }
+        }
+        
+        // Update upcoming tasks count
+        function updateUpcomingTasks(tasks) {
+            const upcomingTasksElement = document.getElementById('upcoming-tasks');
+            const urgentTasksElement = document.getElementById('urgent-tasks');
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Filter tasks that are not completed and due today or in the future
+            const upcomingTasks = tasks.filter(task => {
+                return !task.completed && (!task.dueDate || task.dueDate >= today);
+            });
+            
+            // Filter urgent tasks (due today or overdue)
+            const urgentTasks = upcomingTasks.filter(task => {
+                return task.dueDate && task.dueDate <= today;
+            });
+            
+            upcomingTasksElement.textContent = upcomingTasks.length;
+            urgentTasksElement.textContent = urgentTasks.length;
+        }
+        
+        // Calculate today's study hours
+        function calculateTodayStudyHours(sessions) {
+            const todayHoursElement = document.getElementById('today-hours');
+            const lastSessionElement = document.getElementById('last-session');
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Filter today's sessions
+            const todaySessions = sessions.filter(session => session.date === today);
+            
+            // Calculate total hours
+            let totalMinutes = 0;
+            todaySessions.forEach(session => {
+                const hours = parseFloat(session.duration);
+                totalMinutes += hours * 60;
+            });
+            
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = Math.floor(totalMinutes % 60);
+            
+            todayHoursElement.textContent = `${hours}h ${minutes}m`;
+            
+            // Set last session time
+            if (todaySessions.length > 0) {
+                const lastSession = todaySessions[todaySessions.length - 1];
+                const endTime = lastSession.endTime || 'earlier';
+                lastSessionElement.textContent = endTime;
+            }
+        }
+        
+        // Calculate weekly goal progress
+        function calculateWeeklyGoal(sessions) {
+            const weeklyGoalElement = document.getElementById('weekly-goal');
+            const weeklyHoursElement = document.getElementById('weekly-hours');
+            const goalHoursElement = document.getElementById('goal-hours');
+            
+            // Get current week's sessions
+            const currentWeekSessions = getCurrentWeekSessions(sessions);
+            
+            // Calculate total hours
+            let totalHours = 0;
+            currentWeekSessions.forEach(session => {
+                totalHours += parseFloat(session.duration);
+            });
+            
+            // Get weekly goal from localStorage (default to 20 hours)
+            const weeklyGoal = parseInt(localStorage.getItem('weeklyGoal')) || 20;
+            
+            // Calculate percentage
+            const percentage = Math.min(Math.round((totalHours / weeklyGoal) * 100), 100);
+            
+            weeklyGoalElement.textContent = `${percentage}%`;
+            weeklyHoursElement.textContent = totalHours.toFixed(1);
+            goalHoursElement.textContent = weeklyGoal;
+        }
+        
+        // Calculate study streak
+        function calculateStudyStreak(sessions) {
+            const streakElement = document.getElementById('study-streak');
+            const bestStreakElement = document.getElementById('best-streak');
+            
+            if (sessions.length === 0) {
+                streakElement.textContent = "0 days";
+                bestStreakElement.textContent = "0";
+                return;
+            }
+            
+            // Sort sessions by date
+            sessions.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Calculate current streak
+            let currentStreak = 0;
+            let bestStreak = 0;
+            let tempStreak = 0;
+            let prevDate = null;
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const uniqueDates = [...new Set(sessions.map(s => s.date))].sort();
+            
+            for (let i = 0; i < uniqueDates.length; i++) {
+                const currentDate = new Date(uniqueDates[i]);
+                currentDate.setHours(0, 0, 0, 0);
+                
+                if (prevDate === null) {
+                    tempStreak = 1;
+                } else {
+                    const diffDays = Math.round((currentDate - prevDate) / (1000 * 60 * 60 * 24));
+                    if (diffDays === 1) {
+                        tempStreak++;
+                    } else if (diffDays > 1) {
+                        bestStreak = Math.max(bestStreak, tempStreak);
+                        tempStreak = 1;
+                    }
+                }
+                
+                if (i === uniqueDates.length - 1) {
+                    bestStreak = Math.max(bestStreak, tempStreak);
+                    
+                    // Check if last session was today or yesterday
+                    const lastSessionDate = new Date(uniqueDates[uniqueDates.length - 1]);
+                    lastSessionDate.setHours(0, 0, 0, 0);
+                    
+                    const diffFromToday = Math.round((today - lastSessionDate) / (1000 * 60 * 60 * 24));
+                    
+                    if (diffFromToday === 0) {
+                        currentStreak = tempStreak;
+                    } else if (diffFromToday === 1) {
+                        currentStreak = tempStreak;
+                    } else {
+                        currentStreak = 0;
+                    }
+                }
+                
+                prevDate = currentDate;
+            }
+            
+            streakElement.textContent = `${currentStreak} day${currentStreak !== 1 ? 's' : ''}`;
+            bestStreakElement.textContent = bestStreak;
+        }
+        
+        // Helper function to get current week's sessions
+        function getCurrentWeekSessions(sessions) {
+            const now = new Date();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+            startOfWeek.setHours(0, 0, 0, 0);
+            
+            const endOfWeek = new Date(now);
+            endOfWeek.setDate(now.getDate() + (6 - now.getDay())); // Saturday
+            endOfWeek.setHours(23, 59, 59, 999);
+            
+            return sessions.filter(session => {
+                const sessionDate = new Date(session.date);
+                return sessionDate >= startOfWeek && sessionDate <= endOfWeek;
+            });
+        }
+        
+        // Display random study tip
+        function displayStudyTip() {
+            const studyTips = [
+                "Active recall (testing yourself) is more effective than passive review for long-term retention.",
+                "Spaced repetition (reviewing material at increasing intervals) helps combat the forgetting curve.",
+                "Teaching concepts to someone else (real or imaginary) is one of the best ways to learn them.",
+                "Mix up your study locations to create more memory associations with the material.",
+                "Summarize what you've learned in your own words after each study session.",
+                "Use the Feynman Technique: explain concepts simply enough that a child could understand.",
+                "Prioritize understanding over memorization - concepts are easier to remember than facts.",
+                "Take regular breaks (5-10 minutes every hour) to maintain focus and prevent burnout.",
+                "Start with the most challenging material when your energy and focus are highest.",
+                "Create mind maps to visualize connections between concepts for better recall.",
+                "Sleep is crucial for memory consolidation - don't sacrifice sleep for last-minute studying.",
+                "Interleave different subjects or topics during study sessions to improve discrimination between concepts.",
+                "Use mnemonic devices to remember lists or sequences of information.",
+                "Practice retrieval by writing down everything you remember about a topic before reviewing your notes.",
+                "Connect new information to what you already know to create stronger neural pathways."
+            ];
+            
+            const randomTip = studyTips[Math.floor(Math.random() * studyTips.length)];
+            document.getElementById('study-tip').innerHTML = `
+                <p class="text-gray-800">"${randomTip}"</p>
+            `;
+        }
+        
+        // Display motivation quote
+        function displayMotivation() {
+            const quotes = [
+                {text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier"},
+                {text: "The secret of getting ahead is getting started.", author: "Mark Twain"},
+                {text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson"},
+                {text: "The expert in anything was once a beginner.", author: "Helen Hayes"},
+                {text: "You don't have to be great to start, but you have to start to be great.", author: "Zig Ziglar"},
+                {text: "The only place where success comes before work is in the dictionary.", author: "Vidal Sassoon"},
+                {text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt"},
+                {text: "It always seems impossible until it's done.", author: "Nelson Mandela"},
+                {text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt"},
+                {text: "You are never too old to set another goal or to dream a new dream.", author: "C.S. Lewis"}
+            ];
+            
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('motivation-quote').innerHTML = `
+                <p class="text-gray-800">"${randomQuote.text}"</p>
+                <p class="text-gray-600 text-sm mt-2">— ${randomQuote.author}</p>
+            `;
+        }
+        
+        // Helper function to format date
+        function formatDate(dateString) {
+            if (!dateString) return 'No date';
+            
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            const date = new Date(dateString);
+            
+            // Check if date is today
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const inputDate = new Date(dateString);
+            inputDate.setHours(0, 0, 0, 0);
+            
+            if (inputDate.getTime() === today.getTime()) {
+                return 'Today';
+            }
+            
+            // Check if date is yesterday
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            if (inputDate.getTime() === yesterday.getTime()) {
+                return 'Yesterday';
+            }
+            
+            // Check if date is tomorrow
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            if (inputDate.getTime() === tomorrow.getTime()) {
+                return 'Tomorrow';
+            }
+            
+            return date.toLocaleDateString('en-US', options);
+        }
+        
+    </script>
+    <!-- Start of ChatBot (www.chatbot.com) code -->
+<script>
+  window.__ow = window.__ow || {};
+  window.__ow.organizationId = "84eb88bc-7786-4255-8a4d-f417924960b7";
+  window.__ow.template_id = "0a9696a6-88fe-43f9-a1bb-3a8d39e1c644";
+  window.__ow.integration_name = "manual_settings";
+  window.__ow.product_name = "chatbot";   
+  ;(function(n,t,c){function i(n){return e._h?e._h.apply(null,n):e._q.push(n)}var e={_q:[],_h:null,_v:"2.0",on:function(){i(["on",c.call(arguments)])},once:function(){i(["once",c.call(arguments)])},off:function(){i(["off",c.call(arguments)])},get:function(){if(!e._h)throw new Error("[OpenWidget] You can't use getters before load.");return i(["get",c.call(arguments)])},call:function(){i(["call",c.call(arguments)])},init:function(){var n=t.createElement("script");n.async=!0,n.type="text/javascript",n.src="https://cdn.openwidget.com/openwidget.js",t.head.appendChild(n)}};!n.__ow.asyncInit&&e.init(),n.OpenWidget=n.OpenWidget||e}(window,document,[].slice))
+</script>
+<noscript>You need to <a href="https://www.chatbot.com/help/chat-widget/enable-javascript-in-your-browser/" rel="noopener nofollow">enable JavaScript</a> in order to use the AI chatbot tool powered by <a href="https://www.chatbot.com/" rel="noopener nofollow" target="_blank">ChatBot</a></noscript>
+<!-- End of ChatBot code -->
+</body>
+</html>

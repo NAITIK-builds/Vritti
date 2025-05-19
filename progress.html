@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vritti - Progress</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Subject color coding */
+        .subject-math { background-color: #3b82f6; }
+        .subject-science { background-color: #10b981; }
+        .subject-english { background-color: #f59e0b; }
+        .subject-history { background-color: #8b5cf6; }
+        .subject-computer { background-color: #ec4899; }
+        .subject-other { background-color: #64748b; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Progress bar animation */
+        @keyframes progressBar {
+            0% { width: 0; }
+        }
+        
+        .progress-bar-animate {
+            animation: progressBar 1.5s ease-out forwards;
+        }
+        
+        /* Sparkline animation */
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+        
+        .sparkline {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: drawLine 1.5s ease-out forwards;
+        }
+        
+        /* Modal transition */
+        .modal-enter {
+            opacity: 0;
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transition: opacity 200ms;
+        }
+        .modal-exit {
+            opacity: 1;
+        }
+        .modal-exit-active {
+            opacity: 0;
+            transition: opacity 200ms;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <!-- Navigation Bar -->
+    <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <i class="fas fa-brain text-3xl mr-3 text-yellow-300"></i>
+                    <h1 class="text-2xl font-bold">Vritti</h1>
+                    <span class="ml-2 text-xs bg-yellow-500 text-gray-900 px-2 py-1 rounded-full">Beta</span>
+                </div>
+                <div class="flex space-x-1 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+                    <a href="index.html" class="nav-item px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </a>
+                    <a href="schedule.html" class="nav-item px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium">
+                        <i class="fas fa-calendar-alt mr-2"></i>Schedule
+                    </a>
+                    <a href="tasks.html" class="nav-item px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium">
+                        <i class="fas fa-tasks mr-2"></i>Tasks
+                    </a>
+                    <a href="progress.html" class="nav-item px-4 py-2 rounded-lg bg-white bg-opacity-20 font-medium">
+                        <i class="fas fa-chart-line mr-2"></i>Progress
+                    </a>
+                    <a href="resources.html" class="nav-item px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium">
+                        <i class="fas fa-book mr-2"></i>Resources
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Progress Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">My Progress</h2>
+                <p class="text-gray-600">Track your academic performance and study habits</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex space-x-3">
+                <div class="relative">
+                    <select id="time-period" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="week">This Week</option>
+                        <option value="month" selected>This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year">This Year</option>
+                        <option value="all">All Time</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <button id="export-progress" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    <i class="fas fa-file-export mr-2"></i>Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Tasks Completed Card -->
+            <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500">Tasks Completed</p>
+                        <h3 class="text-3xl font-bold text-gray-800" id="completed-tasks-count">0</h3>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-check-circle text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm text-gray-500">
+                    <span id="tasks-trend" class="mr-2"><i class="fas fa-arrow-up text-green-500"></i> 0%</span>
+                    <span>vs previous period</span>
+                </div>
+            </div>
+
+            <!-- Study Hours Card -->
+            <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500">Study Hours</p>
+                        <h3 class="text-3xl font-bold text-gray-800" id="study-hours">0</h3>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-clock text-green-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm text-gray-500">
+                    <span id="hours-trend" class="mr-2"><i class="fas fa-arrow-up text-green-500"></i> 0%</span>
+                    <span>vs previous period</span>
+                </div>
+            </div>
+
+            <!-- Productivity Score Card -->
+            <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500">Productivity</p>
+                        <h3 class="text-3xl font-bold text-gray-800" id="productivity-score">0%</h3>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <i class="fas fa-bolt text-yellow-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="productivity-bar" class="bg-yellow-500 h-2.5 rounded-full progress-bar-animate" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Streak Card -->
+            <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500">Current Streak</p>
+                        <h3 class="text-3xl font-bold text-gray-800" id="current-streak">0 days</h3>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-fire text-red-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-500">
+                    <span id="streak-record">Record: 0 days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Tasks Completion Chart -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Task Completion</h3>
+                    <div class="flex space-x-2">
+                        <button class="chart-toggle active px-3 py-1 bg-indigo-100 text-indigo-700 rounded-md text-sm" data-chart="completion">Completion</button>
+                        <button class="chart-toggle px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm" data-chart="timeline">Timeline</button>
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="tasksChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Subject Distribution Chart -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Subject Distribution</h3>
+                    <div class="flex space-x-2">
+                        <button class="chart-toggle active px-3 py-1 bg-indigo-100 text-indigo-700 rounded-md text-sm" data-chart="subject">Tasks</button>
+                        <button class="chart-toggle px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm" data-chart="hours">Hours</button>
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="subjectsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Statistics -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-6">Detailed Statistics</h3>
+
+            <!-- Weekly Progress -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="font-medium text-gray-700">Weekly Progress</h4>
+                    <span class="text-sm text-gray-500">Last 8 weeks</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <div class="min-w-full">
+                        <div class="grid grid-cols-8 gap-2 mb-2">
+                            <div class="text-center text-xs text-gray-500">Week</div>
+                            <div class="text-center text-xs text-gray-500">Tasks</div>
+                            <div class="text-center text-xs text-gray-500">Hours</div>
+                            <div class="text-center text-xs text-gray-500">Productivity</div>
+                            <div class="text-center text-xs text-gray-500">Math</div>
+                            <div class="text-center text-xs text-gray-500">Science</div>
+                            <div class="text-center text-xs text-gray-500">English</div>
+                            <div class="text-center text-xs text-gray-500">Other</div>
+                        </div>
+                        <div id="weekly-stats-container" class="space-y-2">
+                            <!-- Weekly stats will be inserted here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Study Pattern -->
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="font-medium text-gray-700">Daily Study Pattern</h4>
+                    <span class="text-sm text-gray-500">Average hours per day</span>
+                </div>
+                <div class="h-64">
+                    <canvas id="dailyPatternChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Study Goals -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-semibold text-gray-800">Study Goals</h3>
+                <button id="add-goal" class="px-3 py-1 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700">
+                    <i class="fas fa-plus mr-1"></i> Add Goal
+                </button>
+            </div>
+
+            <div id="goals-container" class="space-y-4">
+                <!-- Goal 1 -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="font-medium text-gray-800">Complete Calculus Syllabus</h4>
+                            <p class="text-sm text-gray-500">Due: May 15, 2023</p>
+                        </div>
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Math</span>
+                    </div>
+                    <div class="mb-2">
+                        <div class="flex justify-between text-sm text-gray-600 mb-1">
+                            <span>Progress: 65%</span>
+                            <span>13/20 topics</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex space-x-2">
+                            <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">
+                                <i class="fas fa-check-circle mr-1"></i> On track
+                            </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="edit-goal text-gray-400 hover:text-indigo-600">
+                                <i class="fas fa-pencil-alt text-sm"></i>
+                            </button>
+                            <button class="delete-goal text-gray-400 hover:text-red-600">
+                                <i class="fas fa-trash-alt text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goal 2 -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="font-medium text-gray-800">Read 5 English Novels</h4>
+                            <p class="text-sm text-gray-500">Due: December 31, 2023</p>
+                        </div>
+                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">English</span>
+                    </div>
+                    <div class="mb-2">
+                        <div class="flex justify-between text-sm text-gray-600 mb-1">
+                            <span>Progress: 40%</span>
+                            <span>2/5 books</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-yellow-500 h-2 rounded-full" style="width: 40%"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex space-x-2">
+                            <span class="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
+                                <i class="fas fa-exclamation-circle mr-1"></i> Needs attention
+                            </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="edit-goal text-gray-400 hover:text-indigo-600">
+                                <i class="fas fa-pencil-alt text-sm"></i>
+                            </button>
+                            <button class="delete-goal text-gray-400 hover:text-red-600">
+                                <i class="fas fa-trash-alt text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goal 3 -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="font-medium text-gray-800">Master Python Programming</h4>
+                            <p class="text-sm text-gray-500">Due: August 30, 2023</p>
+                        </div>
+                        <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">Computer</span>
+                    </div>
+                    <div class="mb-2">
+                        <div class="flex justify-between text-sm text-gray-600 mb-1">
+                            <span>Progress: 25%</span>
+                            <span>5/20 projects</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-purple-600 h-2 rounded-full" style="width: 25%"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex space-x-2">
+                            <span class="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full">
+                                <i class="fas fa-times-circle mr-1"></i> Behind schedule
+                            </span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="edit-goal text-gray-400 hover:text-indigo-600">
+                                <i class="fas fa-pencil-alt text-sm"></i>
+                            </button>
+                            <button class="delete-goal text-gray-400 hover:text-red-600">
+                                <i class="fas fa-trash-alt text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Goal Modal -->
+        <div id="goal-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 fade-in">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800">Add New Goal</h3>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Goal Title*</label>
+                        <input type="text" id="goal-title" placeholder="E.g. Complete Physics Syllabus" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Description</label>
+                        <textarea id="goal-description" rows="3" placeholder="Goal details..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Due Date</label>
+                            <input type="date" id="goal-due-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Subject</label>
+                            <select id="goal-subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="math">Math</option>
+                                <option value="science">Science</option>
+                                <option value="english">English</option>
+                                <option value="history">History</option>
+                                <option value="computer">Computer</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Target</label>
+                            <input type="number" id="goal-target" placeholder="E.g. 10" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Unit</label>
+                            <input type="text" id="goal-unit" placeholder="E.g. chapters, books, etc." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Completed</label>
+                            <input type="number" id="goal-completed" placeholder="E.g. 5" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                    <button id="cancel-goal" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Cancel</button>
+                    <button id="save-goal" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Add Goal</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Goal Modal -->
+        <div id="edit-goal-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 fade-in">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800">Edit Goal</h3>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Goal Title*</label>
+                        <input type="text" id="edit-goal-title" placeholder="E.g. Complete Physics Syllabus" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Description</label>
+                        <textarea id="edit-goal-description" rows="3" placeholder="Goal details..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Due Date</label>
+                            <input type="date" id="edit-goal-due-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Subject</label>
+                            <select id="edit-goal-subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="math">Math</option>
+                                <option value="science">Science</option>
+                                <option value="english">English</option>
+                                <option value="history">History</option>
+                                <option value="computer">Computer</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Target</label>
+                            <input type="number" id="edit-goal-target" placeholder="E.g. 10" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Unit</label>
+                            <input type="text" id="edit-goal-unit" placeholder="E.g. chapters, books, etc." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Completed</label>
+                            <input type="number" id="edit-goal-completed" placeholder="E.g. 5" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                    <button id="cancel-edit-goal" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Cancel</button>
+                    <button id="update-goal" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Update Goal</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load sample data (in a real app, this would come from an API or localStorage)
+            loadProgressData();
+            
+            // Set up event listeners
+            document.getElementById('add-goal').addEventListener('click', showAddGoalModal);
+            document.getElementById('cancel-goal').addEventListener('click', hideAddGoalModal);
+            document.getElementById('save-goal').addEventListener('click', addGoal);
+            document.getElementById('time-period').addEventListener('change', updateTimePeriod);
+            document.getElementById('export-progress').addEventListener('click', exportProgress);
+            
+            // Edit goal modal
+            document.getElementById('cancel-edit-goal').addEventListener('click', hideEditGoalModal);
+            document.getElementById('update-goal').addEventListener('click', updateGoal);
+            
+            // Chart toggle buttons
+            document.querySelectorAll('.chart-toggle').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const parent = this.closest('.bg-white');
+                    const buttons = parent.querySelectorAll('.chart-toggle');
+                    buttons.forEach(b => b.classList.remove('active', 'bg-indigo-100', 'text-indigo-700'));
+                    buttons.forEach(b => b.classList.add('bg-gray-100', 'text-gray-700'));
+                    
+                    this.classList.add('active', 'bg-indigo-100', 'text-indigo-700');
+                    this.classList.remove('bg-gray-100', 'text-gray-700');
+                    
+                    const chartType = this.dataset.chart;
+                    if (parent.querySelector('#tasksChart')) {
+                        toggleTasksChart(chartType);
+                    } else if (parent.querySelector('#subjectsChart')) {
+                        toggleSubjectsChart(chartType);
+                    }
+                });
+            });
+            
+            // Set up goal edit/delete buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('delete-goal') || e.target.parentElement.classList.contains('delete-goal')) {
+                    const goalElement = e.target.closest('.border');
+                    goalElement.remove();
+                    showToast('Goal deleted successfully', 'success');
+                }
+                
+                if (e.target.classList.contains('edit-goal') || e.target.parentElement.classList.contains('edit-goal')) {
+                    const goalElement = e.target.closest('.border');
+                    showEditGoalModal(goalElement);
+                }
+            });
+        });
+        
+        // Load progress data
+        function loadProgressData() {
+            // In a real app, this would come from an API or localStorage
+            const sampleData = {
+                tasksCompleted: 42,
+                tasksTrend: 15,
+                studyHours: 36.5,
+                hoursTrend: 8,
+                productivityScore: 78,
+                currentStreak: 14,
+                recordStreak: 21,
+                weeklyStats: [
+                    { week: 'W1', tasks: 5, hours: 4.5, productivity: 65, math: 2, science: 1, english: 1, other: 1 },
+                    { week: 'W2', tasks: 7, hours: 6.2, productivity: 72, math: 3, science: 2, english: 1, other: 1 },
+                    { week: 'W3', tasks: 6, hours: 5.8, productivity: 68, math: 2, science: 2, english: 1, other: 1 },
+                    { week: 'W4', tasks: 8, hours: 7.1, productivity: 75, math: 3, science: 2, english: 2, other: 1 },
+                    { week: 'W5', tasks: 9, hours: 8.0, productivity: 82, math: 4, science: 2, english: 2, other: 1 },
+                    { week: 'W6', tasks: 10, hours: 9.5, productivity: 85, math: 5, science: 2, english: 2, other: 1 },
+                    { week: 'W7', tasks: 8, hours: 7.3, productivity: 79, math: 4, science: 2, english: 1, other: 1 },
+                    { week: 'W8', tasks: 12, hours: 10.0, productivity: 88, math: 6, science: 3, english: 2, other: 1 }
+                ],
+                dailyPattern: [1.5, 2.0, 1.8, 2.2, 1.6, 3.0, 0.5], // Sun-Sat
+                subjectDistribution: {
+                    math: 24,
+                    science: 12,
+                    english: 8,
+                    history: 5,
+                    computer: 10,
+                    other: 3
+                },
+                subjectHours: {
+                    math: 18.5,
+                    science: 9.2,
+                    english: 6.0,
+                    history: 3.5,
+                    computer: 8.0,
+                    other: 2.0
+                },
+                tasksTimeline: [3, 5, 7, 6, 9, 8, 4] // Last 7 days
+            };
+            
+            // Update summary cards
+            document.getElementById('completed-tasks-count').textContent = sampleData.tasksCompleted;
+            document.getElementById('tasks-trend').innerHTML = `<i class="fas fa-arrow-${sampleData.tasksTrend > 0 ? 'up text-green-500' : 'down text-red-500'}"></i> ${Math.abs(sampleData.tasksTrend)}%`;
+            document.getElementById('study-hours').textContent = sampleData.studyHours.toFixed(1);
+            document.getElementById('hours-trend').innerHTML = `<i class="fas fa-arrow-${sampleData.hoursTrend > 0 ? 'up text-green-500' : 'down text-red-500'}"></i> ${Math.abs(sampleData.hoursTrend)}%`;
+            document.getElementById('productivity-score').textContent = `${sampleData.productivityScore}%`;
+            document.getElementById('productivity-bar').style.width = `${sampleData.productivityScore}%`;
+            document.getElementById('current-streak').textContent = `${sampleData.currentStreak} days`;
+            document.getElementById('streak-record').textContent = `Record: ${sampleData.recordStreak} days`;
+            
+            // Render weekly stats
+            renderWeeklyStats(sampleData.weeklyStats);
+            
+            // Initialize charts
+            initTasksChart(sampleData.tasksCompleted, sampleData.tasksTimeline);
+            initSubjectsChart(sampleData.subjectDistribution, sampleData.subjectHours);
+            initDailyPatternChart(sampleData.dailyPattern);
+        }
+        
+        // Render weekly stats
+        function renderWeeklyStats(stats) {
+            const container = document.getElementById('weekly-stats-container');
+            container.innerHTML = '';
+            
+            stats.forEach(week => {
+                const weekElement = document.createElement('div');
+                weekElement.className = 'grid grid-cols-8 gap-2 text-sm';
+                
+                weekElement.innerHTML = `
+                    <div class="text-center font-medium">${week.week}</div>
+                    <div class="text-center">${week.tasks}</div>
+                    <div class="text-center">${week.hours.toFixed(1)}</div>
+                    <div class="text-center">${week.productivity}%</div>
+                    <div class="text-center">${week.math}</div>
+                    <div class="text-center">${week.science}</div>
+                    <div class="text-center">${week.english}</div>
+                    <div class="text-center">${week.other}</div>
+                `;
+                
+                container.appendChild(weekElement);
+            });
+        }
+        
+        // Initialize tasks chart
+        function initTasksChart(totalTasks, timelineData) {
+            const ctx = document.getElementById('tasksChart').getContext('2d');
+            
+            // Destroy previous chart if it exists
+            if (window.tasksChart) {
+                window.tasksChart.destroy();
+            }
+            
+            window.tasksChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Completed'],
+                    datasets: [{
+                        label: 'Tasks Completed',
+                        data: [totalTasks],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 5
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Initialize subjects chart
+        function initSubjectsChart(subjectTasks, subjectHours) {
+            const ctx = document.getElementById('subjectsChart').getContext('2d');
+            
+            // Destroy previous chart if it exists
+            if (window.subjectsChart) {
+                window.subjectsChart.destroy();
+            }
+            
+            window.subjectsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Math', 'Science', 'English', 'History', 'Computer', 'Other'],
+                    datasets: [{
+                        data: Object.values(subjectTasks),
+                        backgroundColor: [
+                            '#3b82f6', // math
+                            '#10b981', // science
+                            '#f59e0b', // english
+                            '#8b5cf6', // history
+                            '#ec4899', // computer
+                            '#64748b'  // other
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+        
+        // Initialize daily pattern chart
+        function initDailyPatternChart(dailyData) {
+            const ctx = document.getElementById('dailyPatternChart').getContext('2d');
+            
+            // Destroy previous chart if it exists
+            if (window.dailyPatternChart) {
+                window.dailyPatternChart.destroy();
+            }
+            
+            window.dailyPatternChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                    datasets: [{
+                        label: 'Study Hours',
+                        data: dailyData,
+                        fill: true,
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderColor: '#6366f1',
+                        tension: 0.3,
+                        pointBackgroundColor: '#6366f1',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Toggle tasks chart between completion and timeline
+        function toggleTasksChart(chartType) {
+            const ctx = document.getElementById('tasksChart').getContext('2d');
+            
+            // Destroy previous chart
+            if (window.tasksChart) {
+                window.tasksChart.destroy();
+            }
+            
+            if (chartType === 'completion') {
+                initTasksChart(42, [3, 5, 7, 6, 9, 8, 4]);
+            } else {
+                // Timeline chart
+                window.tasksChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Today'],
+                        datasets: [{
+                            label: 'Tasks Completed',
+                            data: [3, 5, 7, 6, 9, 8, 4],
+                            fill: true,
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderColor: '#6366f1',
+                            tension: 0.3,
+                            pointBackgroundColor: '#6366f1',
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 2
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Toggle subjects chart between tasks and hours
+        function toggleSubjectsChart(chartType) {
+            const ctx = document.getElementById('subjectsChart').getContext('2d');
+            
+            // Destroy previous chart
+            if (window.subjectsChart) {
+                window.subjectsChart.destroy();
+            }
+            
+            if (chartType === 'subject') {
+                initSubjectsChart({
+                    math: 24,
+                    science: 12,
+                    english: 8,
+                    history: 5,
+                    computer: 10,
+                    other: 3
+                }, {
+                    math: 18.5,
+                    science: 9.2,
+                    english: 6.0,
+                    history: 3.5,
+                    computer: 8.0,
+                    other: 2.0
+                });
+            } else {
+                // Hours chart
+                window.subjectsChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Math', 'Science', 'English', 'History', 'Computer', 'Other'],
+                        datasets: [{
+                            data: [18.5, 9.2, 6.0, 3.5, 8.0, 2.0],
+                            backgroundColor: [
+                                '#3b82f6', // math
+                                '#10b981', // science
+                                '#f59e0b', // english
+                                '#8b5cf6', // history
+                                '#ec4899', // computer
+                                '#64748b'  // other
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${label}: ${value}h (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+        }
+        
+        // Update time period
+        function updateTimePeriod() {
+            const period = document.getElementById('time-period').value;
+            // In a real app, this would fetch new data based on the selected period
+            console.log(`Time period changed to: ${period}`);
+            // For now, we'll just reload the same data
+            loadProgressData();
+        }
+        
+        // Show add goal modal
+        function showAddGoalModal() {
+            document.getElementById('goal-modal').classList.remove('hidden');
+            
+            // Set default due date to one month from now
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            document.getElementById('goal-due-date').valueAsDate = nextMonth;
+            
+            document.getElementById('goal-title').focus();
+        }
+        
+        // Hide add goal modal
+        function hideAddGoalModal() {
+            document.getElementById('goal-modal').classList.add('hidden');
+            // Reset form
+            document.getElementById('goal-title').value = '';
+            document.getElementById('goal-description').value = '';
+            document.getElementById('goal-due-date').value = '';
+            document.getElementById('goal-subject').value = 'math';
+            document.getElementById('goal-target').value = '';
+            document.getElementById('goal-unit').value = '';
+            document.getElementById('goal-completed').value = '';
+        }
+        
+        // Show edit goal modal
+        function showEditGoalModal(goalElement) {
+            document.getElementById('edit-goal-modal').classList.remove('hidden');
+            
+            // Get goal data from the element
+            const title = goalElement.querySelector('h4').textContent;
+            const description = ''; // Not shown in the UI
+            const dueDateText = goalElement.querySelector('p').textContent.replace('Due: ', '');
+            const dueDate = new Date(dueDateText);
+            const subject = goalElement.querySelector('span').textContent.toLowerCase();
+            const progressText = goalElement.querySelector('span:not(.text-xs)').textContent;
+            const progress = parseInt(progressText.replace('Progress: ', '').replace('%', ''));
+            const [completed, target] = goalElement.querySelectorAll('span.text-sm span')[1].textContent.split('/').map(Number);
+            
+            // Populate form
+            document.getElementById('edit-goal-title').value = title;
+            document.getElementById('edit-goal-description').value = description;
+            document.getElementById('edit-goal-due-date').valueAsDate = dueDate;
+            document.getElementById('edit-goal-subject').value = subject;
+            document.getElementById('edit-goal-target').value = target;
+            document.getElementById('edit-goal-completed').value = completed;
+            
+            // Store reference to the goal being edited
+            document.getElementById('edit-goal-modal').dataset.goalElement = goalElement;
+            
+            document.getElementById('edit-goal-title').focus();
+        }
+        
+        // Hide edit goal modal
+        function hideEditGoalModal() {
+            document.getElementById('edit-goal-modal').classList.add('hidden');
+            // Reset form
+            document.getElementById('edit-goal-title').value = '';
+            document.getElementById('edit-goal-description').value = '';
+            document.getElementById('edit-goal-due-date').value = '';
+            document.getElementById('edit-goal-subject').value = 'math';
+            document.getElementById('edit-goal-target').value = '';
+            document.getElementById('edit-goal-unit').value = '';
+            document.getElementById('edit-goal-completed').value = '';
+        }
+        
+        // Add new goal
+        function addGoal() {
+            const title = document.getElementById('goal-title').value.trim();
+            const description = document.getElementById('goal-description').value.trim();
+            const dueDate = document.getElementById('goal-due-date').value;
+            const subject = document.getElementById('goal-subject').value;
+            const target = parseInt(document.getElementById('goal-target').value);
+            const unit = document.getElementById('goal-unit').value.trim();
+            const completed = parseInt(document.getElementById('goal-completed').value) || 0;
+            
+            // Validate inputs
+            if (!title || !dueDate || isNaN(target) || !unit) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Calculate progress
+            const progress = Math.round((completed / target) * 100);
+            
+            // Determine status
+            let statusClass, statusText, statusIcon;
+            if (progress >= 80) {
+                statusClass = 'bg-green-100 text-green-800';
+                statusText = 'On track';
+                statusIcon = 'fa-check-circle';
+            } else if (progress >= 50) {
+                statusClass = 'bg-yellow-100 text-yellow-800';
+                statusText = 'Needs attention';
+                statusIcon = 'fa-exclamation-circle';
+            } else {
+                statusClass = 'bg-red-100 text-red-800';
+                statusText = 'Behind schedule';
+                statusIcon = 'fa-times-circle';
+            }
+            
+            // Format due date
+            const formattedDueDate = new Date(dueDate).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            // Subject colors
+            const subjectClasses = {
+                math: 'bg-blue-100 text-blue-800',
+                science: 'bg-green-100 text-green-800',
+                english: 'bg-yellow-100 text-yellow-800',
+                history: 'bg-purple-100 text-purple-800',
+                computer: 'bg-pink-100 text-pink-800',
+                other: 'bg-gray-100 text-gray-800'
+            };
+            
+            // Create goal element
+            const goalElement = document.createElement('div');
+            goalElement.className = 'border border-gray-200 rounded-lg p-4';
+            goalElement.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <h4 class="font-medium text-gray-800">${title}</h4>
+                        <p class="text-sm text-gray-500">Due: ${formattedDueDate}</p>
+                    </div>
+                    <span class="px-2 py-1 ${subjectClasses[subject]} rounded-full text-xs">${subject.charAt(0).toUpperCase() + subject.slice(1)}</span>
+                </div>
+                <div class="mb-2">
+                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                        <span>Progress: ${progress}%</span>
+                        <span>${completed}/${target} ${unit}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="h-2 rounded-full" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="flex space-x-2">
+                        <span class="text-xs px-2 py-1 ${statusClass} rounded-full">
+                            <i class="fas ${statusIcon} mr-1"></i> ${statusText}
+                        </span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="edit-goal text-gray-400 hover:text-indigo-600">
+                            <i class="fas fa-pencil-alt text-sm"></i>
+                        </button>
+                        <button class="delete-goal text-gray-400 hover:text-red-600">
+                            <i class="fas fa-trash-alt text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Set progress bar color based on subject
+            const progressBar = goalElement.querySelector('.h-2.rounded-full');
+            switch(subject) {
+                case 'math': progressBar.classList.add('bg-blue-600'); break;
+                case 'science': progressBar.classList.add('bg-green-600'); break;
+                case 'english': progressBar.classList.add('bg-yellow-500'); break;
+                case 'history': progressBar.classList.add('bg-purple-600'); break;
+                case 'computer': progressBar.classList.add('bg-pink-600'); break;
+                default: progressBar.classList.add('bg-gray-600');
+            }
+            
+            // Add to container
+            document.getElementById('goals-container').prepend(goalElement);
+            
+            // Hide modal
+            hideAddGoalModal();
+            
+            showToast('Goal added successfully', 'success');
+        }
+        
+        // Update existing goal
+        function updateGoal() {
+            const goalElement = document.getElementById('edit-goal-modal').dataset.goalElement;
+            const title = document.getElementById('edit-goal-title').value.trim();
+            const description = document.getElementById('edit-goal-description').value.trim();
+            const dueDate = document.getElementById('edit-goal-due-date').value;
+            const subject = document.getElementById('edit-goal-subject').value;
+            const target = parseInt(document.getElementById('edit-goal-target').value);
+            const unit = document.getElementById('edit-goal-unit').value.trim();
+            const completed = parseInt(document.getElementById('edit-goal-completed').value) || 0;
+            
+            // Validate inputs
+            if (!title || !dueDate || isNaN(target) || !unit) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Calculate progress
+            const progress = Math.round((completed / target) * 100);
+            
+            // Determine status
+            let statusClass, statusText, statusIcon;
+            if (progress >= 80) {
+                statusClass = 'bg-green-100 text-green-800';
+                statusText = 'On track';
+                statusIcon = 'fa-check-circle';
+            } else if (progress >= 50) {
+                statusClass = 'bg-yellow-100 text-yellow-800';
+                statusText = 'Needs attention';
+                statusIcon = 'fa-exclamation-circle';
+            } else {
+                statusClass = 'bg-red-100 text-red-800';
+                statusText = 'Behind schedule';
+                statusIcon = 'fa-times-circle';
+            }
+            
+            // Format due date
+            const formattedDueDate = new Date(dueDate).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            // Subject colors
+            const subjectClasses = {
+                math: 'bg-blue-100 text-blue-800',
+                science: 'bg-green-100 text-green-800',
+                english: 'bg-yellow-100 text-yellow-800',
+                history: 'bg-purple-100 text-purple-800',
+                computer: 'bg-pink-100 text-pink-800',
+                other: 'bg-gray-100 text-gray-800'
+            };
+            
+            // Update goal element
+            goalElement.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <h4 class="font-medium text-gray-800">${title}</h4>
+                        <p class="text-sm text-gray-500">Due: ${formattedDueDate}</p>
+                    </div>
+                    <span class="px-2 py-1 ${subjectClasses[subject]} rounded-full text-xs">${subject.charAt(0).toUpperCase() + subject.slice(1)}</span>
+                </div>
+                <div class="mb-2">
+                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                        <span>Progress: ${progress}%</span>
+                        <span>${completed}/${target} ${unit}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="h-2 rounded-full" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="flex space-x-2">
+                        <span class="text-xs px-2 py-1 ${statusClass} rounded-full">
+                            <i class="fas ${statusIcon} mr-1"></i> ${statusText}
+                        </span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="edit-goal text-gray-400 hover:text-indigo-600">
+                            <i class="fas fa-pencil-alt text-sm"></i>
+                        </button>
+                        <button class="delete-goal text-gray-400 hover:text-red-600">
+                            <i class="fas fa-trash-alt text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Set progress bar color based on subject
+            const progressBar = goalElement.querySelector('.h-2.rounded-full');
+            switch(subject) {
+                case 'math': progressBar.classList.add('bg-blue-600'); break;
+                case 'science': progressBar.classList.add('bg-green-600'); break;
+                case 'english': progressBar.classList.add('bg-yellow-500'); break;
+                case 'history': progressBar.classList.add('bg-purple-600'); break;
+                case 'computer': progressBar.classList.add('bg-pink-600'); break;
+                default: progressBar.classList.add('bg-gray-600');
+            }
+            
+            // Hide modal
+            hideEditGoalModal();
+            
+            showToast('Goal updated successfully', 'success');
+        }
+        
+        // Export progress data
+        function exportProgress() {
+            // In a real app, this would generate a PDF or CSV
+            showToast('Exporting progress data...', 'info');
+        }
+        
+        // Show toast notification
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500',
+                warning: 'bg-yellow-500'
+            };
+            
+            toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-md text-white ${colors[type]} shadow-lg fade-in`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
