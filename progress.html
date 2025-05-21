@@ -93,6 +93,76 @@
             opacity: 0;
             transition: opacity 200ms;
         }
+        
+        /* Custom checkbox */
+        .custom-checkbox {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            appearance: none;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .custom-checkbox:checked {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+        
+        .custom-checkbox:checked::after {
+            content: '\2713';
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Custom radio */
+        .custom-radio {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #d1d5db;
+            border-radius: 50%;
+            appearance: none;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .custom-radio:checked {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+        
+        .custom-radio:checked::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Pulse animation */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans">
@@ -398,16 +468,16 @@
                                 <i class="fas fa-times-circle mr-1"></i> Behind schedule
                             </span>
                         </div>
-                        <div class="flex space-x-2">
-                            <button class="edit-goal text-gray-400 hover:text-indigo-600">
-                                <i class="fas fa-pencil-alt text-sm"></i>
-                            </button>
-                            <button class="delete-goal text-gray-400 hover:text-red-600">
-                                <i class="fas fa-trash-alt text-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <div class="flex space-x-2">
+            <button class="edit-goal text-gray-400 hover:text-indigo-600">
+                <i class="fas fa-pencil-alt text-sm"></i>
+            </button>
+            <button class="delete-goal text-gray-400 hover:text-red-600">
+                <i class="fas fa-trash-alt text-sm"></i>
+            </button>
+        </div>
+    </div>
+</div>
             </div>
         </div>
 
@@ -574,7 +644,7 @@
                 }
             });
         });
-        
+
         // Load progress data
         function loadProgressData() {
             // In a real app, this would come from an API or localStorage
@@ -1238,16 +1308,5 @@
             }, 3000);
         }
     </script>
-<!-- Start of ChatBot (www.chatbot.com) code -->
-<script>
-  window.__ow = window.__ow || {};
-  window.__ow.organizationId = "84eb88bc-7786-4255-8a4d-f417924960b7";
-  window.__ow.template_id = "0a9696a6-88fe-43f9-a1bb-3a8d39e1c644";
-  window.__ow.integration_name = "manual_settings";
-  window.__ow.product_name = "chatbot";   
-  ;(function(n,t,c){function i(n){return e._h?e._h.apply(null,n):e._q.push(n)}var e={_q:[],_h:null,_v:"2.0",on:function(){i(["on",c.call(arguments)])},once:function(){i(["once",c.call(arguments)])},off:function(){i(["off",c.call(arguments)])},get:function(){if(!e._h)throw new Error("[OpenWidget] You can't use getters before load.");return i(["get",c.call(arguments)])},call:function(){i(["call",c.call(arguments)])},init:function(){var n=t.createElement("script");n.async=!0,n.type="text/javascript",n.src="https://cdn.openwidget.com/openwidget.js",t.head.appendChild(n)}};!n.__ow.asyncInit&&e.init(),n.OpenWidget=n.OpenWidget||e}(window,document,[].slice))
-</script>
-<noscript>You need to <a href="https://www.chatbot.com/help/chat-widget/enable-javascript-in-your-browser/" rel="noopener nofollow">enable JavaScript</a> in order to use the AI chatbot tool powered by <a href="https://www.chatbot.com/" rel="noopener nofollow" target="_blank">ChatBot</a></noscript>
-<!-- End of ChatBot code -->
 </body>
 </html>
